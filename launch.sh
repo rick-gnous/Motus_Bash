@@ -4,7 +4,7 @@
 
 #************************#
 #         motus          #
-#         v1.0b          #
+#         v1.1b          #
 #                        #
 #   motus mais en bash   #
 #************************#
@@ -39,6 +39,7 @@ for ((r=1;r<=num_rows;r++)) do
     for ((c=1;c<=num_columns;c++)) do
         tableauMot[$c,$r]=_
     done
+    motTrouve[$r]=_     #tableau contenant la réponse de l’utilisateur, pour garder les bonnes lettres
 done
 
 
@@ -78,6 +79,7 @@ affichageReponse () {
         case "${verif[i]}" in
             1)      # bonne lettrei
                 nbLettresBonnes=$(( nbLettresBonnes+1 ))
+                motTrouve[$i]=$lettre
                 echo -en $rouge $lettre $blanc
                 paplay data/sound/bon.ogg
                 tableauMot[$((j+1)),$i]=$lettre     # on met la lettre dans la case suivante
@@ -96,7 +98,27 @@ affichageReponse () {
         correct=1
     fi
     echo ""
-    }
+}
+
+
+# ---------------------------------------------------------------- #
+# checkMotTrouve ()                                                #
+# vérifie si la variable contenant le mot trouve est bonne         #
+# ---------------------------------------------------------------- #
+#checkMotTrouve () {
+#    nbLettresBonnes=0
+#    for i in `seq 1 ${#mot}`; do
+#        lettre=${motTrouve[$i]}     #on récupère la lettre du tableau
+#        if [ "$lettre" = "${mot:$((i-1)):1}" ]; then       #si elle est à son emplacement, on met 1
+#            verif[$i]=1
+#            nbLettresBonnes=$(( nbLettresBonnes+1 ))
+#        fi
+#        i=$(( i+1 ))
+#    done
+#    if [ $nbLettresBonnes -eq 6 ]; then
+#        correct=1
+#    fi
+#}
 
 
 # -------------------------------------- #
@@ -105,7 +127,8 @@ affichageReponse () {
 # -------------------------------------- #
 affichagePrec () {
     for i in `seq 1 ${#mot}`; do     # pour les lettres du mot
-        lettre=${tableauMot[$compteur,$i]}     # on prend la lettre du tableau
+        lettre=${motTrouve[$i]}
+        #lettre=${tableauMot[$compteur,$i]}     # on prend la lettre du tableau
         echo -n "" $lettre "" 
     done
     echo ""
@@ -141,7 +164,9 @@ check () {
 entree () {
     read motEntre
     while [ "${#motEntre}" -ne 6 ]; do
+        echo "Rentrez un mot de 6 lettres."
         read motEntre
+        echo 
     done
     recupIndex
     j=$?
@@ -158,6 +183,13 @@ entree () {
 compteur=1      # nombre de coups
 
 pickRandom
+echo "#########################"
+echo "  Bienvenue sur Motus !  "
+echo "#########################"
+echo
+
+echo "Vous devez deviner un mot de 6 lettres !"
+echo
 
 while [ $compteur -le ${#mot} ]; do
     if [ $correct -eq 1 ]; then
@@ -170,6 +202,8 @@ while [ $compteur -le ${#mot} ]; do
         compteur=$((compteur+1))
     fi
 done
+
+#checkMotTrouve
 
 if [ $correct -eq 1 ]; then
     echo "Victoire !"
